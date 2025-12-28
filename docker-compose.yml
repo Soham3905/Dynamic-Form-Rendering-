@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  metro:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - myfirstapp:latest
+
+    volumes:
+      - .:/app:cached
+      - /app/node_modules
+      - metro-cache:/app/.metro-cache
+
+    ports:
+      - "8081:8081"
+
+    environment:
+      - REACT_NATIVE_PACKAGER_HOSTNAME=0.0.0.0
+      - NODE_ENV=development
+
+    stdin_open: true
+    tty: true
+
+volumes:
+  metro-cache:

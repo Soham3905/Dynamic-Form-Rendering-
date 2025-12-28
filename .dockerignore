@@ -1,0 +1,29 @@
+# dependencies
+node_modules
+.npm
+yarn.lock
+
+# android build outputs
+/android/.gradle
+/android/app/build
+/android/build
+
+# iOS build outputs
+/ios/Pods
+/ios/build
+
+# testing
+/coverage
+__tests__
+
+# misc
+.dockerignore
+.git
+.gitignore
+.env
+.eslintrc.js
+.prettierrc.js
+.vscode
+*.log
+.DS_Store
+Thumbs.db
