@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import {FormField} from './formFields'
+import { FormField } from './formFields'
 export const FormSection = ({
   section,
   fields,
@@ -13,7 +13,7 @@ export const FormSection = ({
   isFieldMandatory,
 }) => {
   return (
-    <View classname="bg-white rounded-xl">
+    <View className="bg-white rounded-xl">
       <TouchableOpacity
         className="flex-row justify-between items-center border-b border-gray-200"
         onPress={onToggle}

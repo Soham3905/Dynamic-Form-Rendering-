@@ -7,19 +7,39 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState } from 'react';
 import DocumentPicker from '@react-native-documents/picker';
 
-// --------------------------------------
+// Get keyboard type based on field type
+const getKeyboardType = (type) => {
+  if (type === 'EMAIL') return 'email-address';
+  if (type === 'MOBILE' || type === 'PINCODE') return 'numeric';
+  return 'default';
+};
+
+// Reusable field label with mandatory indicator
+const FieldLabel = ({ title, isMandatory }) => (
+  <Text className="text-sm font-medium text-gray-700 mb-2">
+    {title}
+    {isMandatory && <Text className="text-red-500"> *</Text>}
+  </Text>
+);
+
+// Reusable error message display
+const ErrorText = ({ error }) =>
+  error && <Text className="text-xs text-red-500 mt-1">{error}</Text>;
+
+// Empty list component for SearchDrawerField
+const EmptyListComponent = () => (
+  <View className="py-4">
+    <Text className="text-sm text-gray-500">No results</Text>
+  </View>
+);
+
 // TEXT FIELD
-// --------------------------------------
 export const TextField = ({ field, value, error, isMandatory, onChange }) => (
   <View>
-    <Text className="text-sm font-medium text-gray-700 mb-2">
-      {field.title}
-      {isMandatory && <Text className="text-red-500"> *</Text>}
-    </Text>
-
+    <FieldLabel title={field.title} isMandatory={isMandatory} />
     <TextInput
       className={`border rounded-lg px-4 py-3 text-base bg-white ${
         error ? 'border-red-500' : 'border-gray-300'
@@ -30,31 +50,16 @@ export const TextField = ({ field, value, error, isMandatory, onChange }) => (
       onChangeText={onChange}
       editable={field.fieldConfig?.isEditable}
       maxLength={field.fieldConfig?.maxLength}
-      keyboardType={
-        field.type === 'EMAIL'
-          ? 'email-address'
-          : field.type === 'MOBILE'
-          ? 'numeric'
-          : field.type === 'PINCODE'
-          ? 'numeric'
-          : 'default'
-      }
+      keyboardType={getKeyboardType(field.type)}
     />
-
-    {error && <Text className="text-xs text-red-500 mt-1">{error}</Text>}
+    <ErrorText error={error} />
   </View>
 );
 
-// --------------------------------------
 // RADIO FIELD
-// --------------------------------------
 export const RadioField = ({ field, value, error, isMandatory, onChange }) => (
   <View>
-    <Text className="text-sm font-medium text-gray-700 mb-3">
-      {field.title}
-      {isMandatory && <Text className="text-red-500"> *</Text>}
-    </Text>
-
+    <FieldLabel title={field.title} isMandatory={isMandatory} />
     <View className="flex-row gap-4">
       {field.options?.map(option => (
         <TouchableOpacity
@@ -62,6 +67,7 @@ export const RadioField = ({ field, value, error, isMandatory, onChange }) => (
           className="flex-row items-center py-2"
           onPress={() => onChange(option.value)}
         >
+          {/* Radio circle indicator */}
           <View className="w-5 h-5 rounded-full border-2 border-blue-500 items-center justify-center mr-2">
             {value === option.value && (
               <View className="w-2.5 h-2.5 rounded-full bg-blue-500" />
@@ -71,92 +77,54 @@ export const RadioField = ({ field, value, error, isMandatory, onChange }) => (
         </TouchableOpacity>
       ))}
     </View>
-
-    {error && <Text className="text-xs text-red-500 mt-1">{error}</Text>}
+    <ErrorText error={error} />
   </View>
 );
 
-// --------------------------------------
 // SEARCH DRAWER FIELD
-// --------------------------------------
-const ListEmpty = () => (
-  <View className="py-4">
-    <Text className="text-sm text-gray-500">No results</Text>
-  </View>
-);
-
 export const SearchDrawerField = ({ field, value, error, isMandatory, onChange }) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
 
-  const options = useMemo(() => {
-    if (!Array.isArray(field?.options)) return [];
-    return field.options.map(opt => {
-      if (typeof opt === 'string') return { name: opt, value: opt };
-      return {
-        name: opt.name ?? opt.label ?? String(opt.value ?? opt.id ?? ''),
-        value: opt.value ?? opt.id ?? opt.name ?? opt.label ?? '',
-      };
-    });
-  }, [field?.options]);
+  // Normalize options to {name, value} format
+  const options = field?.options?.map(opt => {
+    if (typeof opt === 'string') return { name: opt, value: opt };
+    return {
+      name: opt.name ?? opt.label ?? String(opt.value ?? opt.id ?? ''),
+      value: opt.value ?? opt.id ?? opt.name ?? opt.label ?? '',
+    };
+  }) || [];
 
-  const filtered = useMemo(() => {
-    const q = (searchText || '').trim().toLowerCase();
-    if (!q) return options;
-    return options.filter(
-      o =>
-        (o.name || '').toLowerCase().includes(q) ||
-        (String(o.value) || '').toLowerCase().includes(q)
-    );
-  }, [options, searchText]);
-
-  const handleSelect = useCallback(
-    opt => {
-      onChange(opt.value);
-      setIsDrawerVisible(false);
-      setSearchText('');
-    },
-    [onChange]
+  // Filter options based on search text
+  const filtered = options.filter(
+    o =>
+      (o.name || '').toLowerCase().includes((searchText || '').toLowerCase()) ||
+      (String(o.value) || '').toLowerCase().includes((searchText || '').toLowerCase())
   );
 
-  const renderItem = useCallback(
-    ({ item }) => (
-      <TouchableOpacity
-        className="py-3 border-b border-gray-200"
-        onPress={() => handleSelect(item)}
-      >
-        <Text className="text-base text-gray-800">{item.name}</Text>
-      </TouchableOpacity>
-    ),
-    [handleSelect]
-  );
-
-  const displayText = useMemo(() => {
-    const found = options.find(o => o.value === value);
-    return found ? found.name : (value ?? field?.placeholder);
-  }, [options, value, field?.placeholder]);
+  // Get display text (selected option name or placeholder)
+  const displayText = options.find(o => o.value === value)?.name || value || field?.placeholder;
 
   return (
     <View>
-      <Text className="text-sm font-medium text-gray-700 mb-2">
-        {field?.title}
-        {isMandatory && <Text className="text-red-500"> *</Text>}
-      </Text>
+      <FieldLabel title={field?.title} isMandatory={isMandatory} />
 
+      {/* Trigger button to open drawer */}
       <TouchableOpacity
         className={`border rounded-lg px-4 py-3 bg-white ${error ? 'border-red-500' : 'border-gray-300'}`}
         onPress={() => setIsDrawerVisible(true)}
       >
         <Text className={value ? 'text-gray-900' : 'text-gray-400'}>{displayText}</Text>
       </TouchableOpacity>
+      <ErrorText error={error} />
 
-      {error && <Text className="text-xs text-red-500 mt-1">{error}</Text>}
-
+      {/* Drawer modal with search and options */}
       <Modal visible={isDrawerVisible} transparent animationType="slide" onRequestClose={() => setIsDrawerVisible(false)}>
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-2xl p-4 max-h-[70%]">
             <Text className="text-lg font-semibold mb-3">{`Select ${field?.title}`}</Text>
 
+            {/* Search input */}
             <TextInput
               value={searchText}
               onChangeText={setSearchText}
@@ -165,13 +133,26 @@ export const SearchDrawerField = ({ field, value, error, isMandatory, onChange }
               className="border rounded-md px-3 py-2 mb-3"
             />
 
+            {/* Options list */}
             <FlatList
               data={filtered}
               keyExtractor={(item, idx) => `${item.value}-${idx}`}
-              renderItem={renderItem}
-              ListEmptyComponent={ListEmpty}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  className="py-3 border-b border-gray-200"
+                  onPress={() => {
+                    onChange(item.value);
+                    setIsDrawerVisible(false);
+                    setSearchText('');
+                  }}
+                >
+                  <Text className="text-base text-gray-800">{item.name}</Text>
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={EmptyListComponent}
             />
 
+            {/* Cancel button */}
             <TouchableOpacity
               className="mt-4 py-3 bg-gray-200 rounded-lg"
               onPress={() => {
@@ -284,21 +265,15 @@ export const FileField = ({ field, value, error, isMandatory, onChange }) => {
         </Text>
       )}
 
-      {error && <Text className="text-xs text-red-500 mt-1">{error}</Text>}
+      <ErrorText error={error} />
     </View>
   );
 };
 
-// --------------------------------------
-// DATE FIELD - FIXED
-// --------------------------------------
+// DATE FIELD
 export const DateField = ({ field, value, error, isMandatory, onChange }) => (
   <View>
-    <Text className="text-sm font-medium text-gray-700 mb-2">
-      {field.title}
-      {isMandatory && <Text className="text-red-500"> *</Text>}
-    </Text>
-    
+    <FieldLabel title={field.title} isMandatory={isMandatory} />
     <TextInput
       className={`border rounded-lg px-4 py-3 text-base bg-white ${
         error ? 'border-red-500' : 'border-gray-300'
@@ -308,14 +283,49 @@ export const DateField = ({ field, value, error, isMandatory, onChange }) => (
       value={value || ''}
       onChangeText={onChange}
     />
-    
-    {error && <Text className="text-xs text-red-500 mt-1">{error}</Text>}
+    <ErrorText error={error} />
   </View>
 );
 
-// --------------------------------------
+// OTP FIELD - 6 digit OTP input
+export const OTPField = ({ field, value, error, isMandatory, onChange }) => (
+  <View>
+    <FieldLabel title={field.title} isMandatory={isMandatory} />
+    <TextInput
+      className={`border rounded-lg px-4 py-3 text-base bg-white ${
+        error ? 'border-red-500' : 'border-gray-300'
+      }`}
+      placeholder={field.placeholder || 'Enter 6-digit OTP'}
+      placeholderTextColor="#9CA3AF"
+      value={value || ''}
+      onChangeText={onChange}
+      keyboardType="numeric"
+      maxLength={6}
+    />
+    <ErrorText error={error} />
+  </View>
+);
+
+// CHECKBOX FIELD - Simple toggle checkbox
+export const CheckboxField = ({ field, value, error, isMandatory, onChange }) => (
+  <View>
+    <TouchableOpacity
+      className="flex-row items-center py-2"
+      onPress={() => onChange(!value)}
+    >
+      {/* Checkbox square */}
+      <View className={`w-5 h-5 rounded border-2 items-center justify-center mr-3 ${
+        value ? 'bg-blue-500 border-blue-500' : 'border-gray-400 bg-white'
+      }`}>
+        {value && <Text className="text-white text-xs">✓</Text>}
+      </View>
+      <Text className="text-sm text-gray-700">{field.placeholder}</Text>
+    </TouchableOpacity>
+    <ErrorText error={error} />
+  </View>
+);
+
 // FIELD RENDERER MAP
-// --------------------------------------
 export const fieldRenderers = {
   TEXT: TextField,
   EMAIL: TextField,
@@ -325,11 +335,11 @@ export const fieldRenderers = {
   SEARCH_DRAWER: SearchDrawerField,
   FILE_UPLOAD: FileField,
   DATE: DateField,
+  OTP: OTPField,
+  CHECKBOX: CheckboxField,
 };
 
-// --------------------------------------
-// MAIN FORM FIELD WRAPPER
-// --------------------------------------
+// MAIN FORM FIELD WRAPPER - Routes to correct field component
 export const FormField = ({ field, value, error, isMandatory, onChange }) => {
   const Renderer = fieldRenderers[field.type];
   if (!Renderer) return null;

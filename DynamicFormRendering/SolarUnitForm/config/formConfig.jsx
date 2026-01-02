@@ -40,6 +40,7 @@ export const formConfigData = {
             getValueFromKey: 'isBillOnYourName',
             shouldValue: 'NO',
             operator: 'equals',
+            trackOnChangedValueIsSame: false,
           },
         ],
       },
@@ -56,6 +57,7 @@ export const formConfigData = {
       },
     },
   ],
+
   fieldsList: {
     solarUnitDetails: [
       {
@@ -77,6 +79,7 @@ export const formConfigData = {
             required: 'Manufacturer name is required',
           },
         },
+        ifPopulatedRemove: false,
       },
       {
         fieldName: 'noOfSolarInstallations',
@@ -95,9 +98,23 @@ export const formConfigData = {
             required: 'Number of solar units is required',
           },
         },
+        ifPopulatedRemove: false,
       },
     ],
+
     installationDetails: [
+      {
+        fieldName: 'installationAddressSameAsCurrent',
+        title: '',
+        placeholder: 'Installation address same as current address  ',
+        type: 'CHECKBOX',
+        fieldConfig: {
+          isMandatory: false,
+          isVisible: true,
+          isEditable: true,
+        },
+        ifPopulatedRemove: true,
+      },
       {
         fieldName: 'address',
         title: 'Address as per E-bill',
@@ -113,6 +130,19 @@ export const formConfigData = {
             invalid: 'Please enter a valid address',
           },
         },
+        conditionalLogic: {
+          populateValue: [
+            {
+              fieldName: 'installationAddressSameAsCurrent',
+              getValueFrom: 'redux',
+              getValueFromKey: 'completeAddress',
+              shouldValue: true,
+              operator: 'equals',
+              trackOnChangedValueIsSame: false,
+            },
+          ],
+        },
+        ifPopulatedRemove: false,
       },
       {
         fieldName: 'houseDetails',
@@ -120,6 +150,9 @@ export const formConfigData = {
         placeholder: 'Flat/house no.',
         type: 'TEXT',
         fieldConfig: {
+          regex:
+            '^(?=.*[a-zA-Z0-9])[a-zA-Z0-9 !@#$%&*()_+<>:;’./?,|`~-]*$',
+          pattern: 'text',
           maxLength: 100,
           isMandatory: true,
           isVisible: true,
@@ -129,6 +162,19 @@ export const formConfigData = {
             invalid: 'Please enter valid house details',
           },
         },
+        conditionalLogic: {
+          populateValue: [
+            {
+              fieldName: 'installationAddressSameAsCurrent',
+              getValueFrom: 'redux',
+              getValueFromKey: 'houseDetails',
+              shouldValue: true,
+              operator: 'equals',
+              trackOnChangedValueIsSame: false,
+            },
+          ],
+        },
+        ifPopulatedRemove: false,
       },
       {
         fieldName: 'area',
@@ -136,6 +182,9 @@ export const formConfigData = {
         placeholder: 'Street, road, etc.',
         type: 'TEXT',
         fieldConfig: {
+          regex:
+            '^(?=.*[a-zA-Z0-9])[a-zA-Z0-9 !@#$%&*()_+<>:;’./?,|`~-]*$',
+          pattern: 'text',
           maxLength: 100,
           isMandatory: true,
           isVisible: true,
@@ -145,6 +194,19 @@ export const formConfigData = {
             invalid: 'Please enter valid area/locality',
           },
         },
+        conditionalLogic: {
+          populateValue: [
+            {
+              fieldName: 'installationAddressSameAsCurrent',
+              getValueFrom: 'redux',
+              getValueFromKey: 'area',
+              shouldValue: 'true',
+              operator: 'equals',
+              trackOnChangedValueIsSame: false,
+            },
+          ],
+        },
+        ifPopulatedRemove: false,
       },
       {
         fieldName: 'pincode',
@@ -154,6 +216,7 @@ export const formConfigData = {
         fieldConfig: {
           regex: '^[1-9][0-9]{5}$',
           pattern: 'pincode',
+          maxLength: 6,
           isMandatory: true,
           isVisible: true,
           isEditable: true,
@@ -162,6 +225,19 @@ export const formConfigData = {
             invalid: 'Please enter a valid 6-digit pincode',
           },
         },
+        conditionalLogic: {
+          populateValue: [
+            {
+              fieldName: 'installationAddressSameAsCurrent',
+              getValueFrom: 'redux',
+              getValueFromKey: 'pincode',
+              shouldValue: 'true',
+              operator: 'equals',
+              trackOnChangedValueIsSame: false,
+            },
+          ],
+        },
+        ifPopulatedRemove: false,
       },
       {
         fieldName: 'city',
@@ -169,6 +245,8 @@ export const formConfigData = {
         placeholder: 'Enter city',
         type: 'TEXT',
         fieldConfig: {
+          regex: '^[A-Za-z ]{1,50}$',
+          pattern: 'text',
           maxLength: 50,
           isMandatory: true,
           isVisible: true,
@@ -178,6 +256,19 @@ export const formConfigData = {
             invalid: 'Please enter valid city name',
           },
         },
+         conditionalLogic: {
+          populateValue: [
+            {
+              fieldName: 'installationAddressSameAsCurrent',
+              getValueFrom: 'redux',
+              getValueFromKey: 'city',
+              shouldValue: 'true',
+              operator: 'equals',
+              trackOnChangedValueIsSame: false,
+            },
+          ],
+        },
+        ifPopulatedRemove: false,
       },
       {
         fieldName: 'consumerNo',
@@ -185,6 +276,8 @@ export const formConfigData = {
         placeholder: 'Enter consumer number',
         type: 'TEXT',
         fieldConfig: {
+          regex: '^[A-Za-z0-9]{1,20}$',
+          pattern: 'text',
           maxLength: 30,
           isMandatory: true,
           isVisible: true,
@@ -194,8 +287,10 @@ export const formConfigData = {
             invalid: 'Please enter a valid consumer number',
           },
         },
+        ifPopulatedRemove: false,
       },
     ],
+
     homeOwnerDetails: [
       {
         fieldName: 'firstName',
@@ -203,6 +298,8 @@ export const formConfigData = {
         placeholder: 'Enter first name',
         type: 'TEXT',
         fieldConfig: {
+          regex: '^[A-Za-z ]{1,50}$',
+          pattern: 'text',
           maxLength: 50,
           isMandatory: true,
           isVisible: true,
@@ -212,6 +309,7 @@ export const formConfigData = {
             invalid: 'Please enter a valid first name',
           },
         },
+        ifPopulatedRemove: false,
       },
       {
         fieldName: 'lastName',
@@ -219,6 +317,8 @@ export const formConfigData = {
         placeholder: 'Enter last name',
         type: 'TEXT',
         fieldConfig: {
+          regex: '^[A-Za-z ]{1,50}$',
+          pattern: 'text',
           maxLength: 50,
           isMandatory: true,
           isVisible: true,
@@ -228,6 +328,7 @@ export const formConfigData = {
             invalid: 'Please enter a valid last name',
           },
         },
+        ifPopulatedRemove: false,
       },
       {
         fieldName: 'emailId',
@@ -235,17 +336,19 @@ export const formConfigData = {
         placeholder: 'Enter email address',
         type: 'EMAIL',
         fieldConfig: {
+          regex:
+            '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
+          pattern: 'email',
           maxLength: 30,
           isMandatory: true,
           isVisible: true,
           isEditable: true,
-          // Basic email regex: requires an @ and a domain (e.g., user@example.com)
-          regex: '^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,}$',
           errorMessages: {
             required: 'Email ID is required',
             invalid: 'Please enter a valid email address',
           },
         },
+        ifPopulatedRemove: false,
       },
       {
         fieldName: 'mobileNumber',
@@ -253,6 +356,7 @@ export const formConfigData = {
         placeholder: 'Enter mobile number',
         type: 'MOBILE',
         fieldConfig: {
+          pattern: 'mobile',
           maxLength: 10,
           isMandatory: true,
           isVisible: true,
@@ -262,25 +366,63 @@ export const formConfigData = {
             invalid: 'Please enter a valid 10-digit mobile',
           },
         },
+        ifPopulatedRemove: false,
+      },
+      {
+        fieldName: 'otpVerification',
+        title: 'OTP verification',
+        placeholder: 'Enter OTP',
+        type: 'OTP',
+        fieldConfig: {
+          regex: '^[0-9]{6}$',
+          pattern: 'numeric',
+          maxLength: 6,
+          isMandatory: true,
+          isVisible: true,
+          isEditable: true,
+          errorMessages: {
+            required: 'OTP is required',
+            invalid: 'Please enter a valid 6-digit OTP',
+          },
+        },
+        conditionalLogic: {
+          showIfValueChanged: [
+            {
+              fieldName: 'mobileNumber',
+              getValueFrom: 'jsonField',
+              getValueFromKey: 'mobileNumber',
+              operator: 'changed',
+              trackOnChangedValueIsSame: true,
+            },
+          ],
+        },
+        ifPopulatedRemove: false,
       },
     ],
+
     documentUpload: [
       {
         fieldName: 'ebill',
-        title: 'E-bill',
+        title: 'E-bill / Receipt',
         placeholder: '',
         type: 'FILE_UPLOAD',
         fieldConfig: {
           isMandatory: false,
           isVisible: true,
           isEditable: true,
+          errorMessages: {
+            required: 'E-bill document is required',
+            invalid:
+              'Please upload a valid document (PDF, JPG, PNG)',
+          },
           description:
             'Upload a clear and readable copy of your electricity bill',
           acceptedFormats: ['pdf', 'jpg', 'jpeg', 'png'],
           maxFileSize: '5MB',
         },
-        bucketName: 'esqadoc-qa',
+        bucketName: 'esdoc',
         docId: '1',
+        ifPopulatedRemove: false,
       },
       {
         fieldName: 'proofOfRelation',
@@ -291,28 +433,112 @@ export const formConfigData = {
           isMandatory: false,
           isVisible: true,
           isEditable: true,
+          errorMessages: {
+            required:
+              'Proof of relation document is required',
+            invalid:
+              'Please upload a valid document (PDF, JPG, PNG)',
+          },
           description: 'Provide a clear image of the relationship document',
           acceptedFormats: ['pdf', 'jpg', 'jpeg', 'png'],
           maxFileSize: '5MB',
         },
-        bucketName: 'esqadoc-qa',
+        conditionalLogic: {
+          showIf: [
+            {
+              fieldName: 'isBillOnYourName',
+              getValueFrom: 'redux',
+              getValueFromKey: 'isBillOnYourName',
+              shouldValue: 'NO',
+              operator: 'equals',
+              trackOnChangedValueIsSame: false,
+            },
+          ],
+          mandatoryIf: [
+            {
+              fieldName: 'isBillOnYourName',
+              getValueFrom: 'redux',
+              getValueFromKey: 'isBillOnYourName',
+              shouldValue: 'NO',
+              operator: 'equals',
+              trackOnChangedValueIsSame: false,
+            },
+          ],
+        },
+        bucketName: 'esdoc',
+        s3BasePath: 'SolarDocs/PROOFREL',
         docId: '8',
+        ifPopulatedRemove: false,
       },
       {
-        fieldName: 'sanctionLetter',
-        title: 'TFR /Sanctioned letter',
+        fieldName: 'propertyDoc',
+        title: 'Property document / House registration',
         placeholder: '',
         type: 'FILE_UPLOAD',
         fieldConfig: {
           isMandatory: false,
           isVisible: true,
           isEditable: true,
+          errorMessages: {
+            required:
+              'Property document / house registration is required',
+            invalid:
+              'Please upload a valid document (PDF, JPG, PNG)',
+          },
+          acceptedFormats: ['pdf', 'jpg', 'jpeg', 'png'],
+          maxFileSize: '5MB',
+          description:
+            'Upload a clear image of the house registration document showing owner and property details.',
+        },
+        conditionalLogic: {
+          showIf: [
+            {
+              fieldName: 'propertyDoc',
+              getValueFrom: 'redux',
+              getValueFromKey: 'propertyDoc',
+              shouldValue: 'true',
+              operator: 'equals',
+              trackOnChangedValueIsSame: false,
+            },
+          ],
+          mandatoryIf: [
+            {
+              fieldName: 'propertyDoc',
+              getValueFrom: 'redux',
+              getValueFromKey: 'propertyDoc',
+              shouldValue: 'true',
+              operator: 'equals',
+              trackOnChangedValueIsSame: false,
+            },
+          ],
+        },
+        bucketName: 'esdoc',
+        s3BasePath: 'SolarDocs/PROPERTYDOC',
+        docId: '11',
+        ifPopulatedRemove: false,
+      },
+      {
+        fieldName: 'sanctionLetter',
+        title: 'TFR /Sanctioned letter',
+        type: 'FILE_UPLOAD',
+        fieldConfig: {
+          isMandatory: false,
+          isVisible: true,
+          isEditable: true,
+          errorMessages: {
+            required:
+              'Sanctioned letter document is required',
+            invalid:
+              'Please upload a valid document (PDF, JPG, PNG)',
+          },
           description: 'Upload a clear photo of the sanctioned letter',
           acceptedFormats: ['pdf', 'jpg', 'jpeg', 'png'],
           maxFileSize: '5MB',
         },
-        bucketName: 'esqadoc-qa',
+        bucketName: 'esdoc',
+        s3BasePath: 'SolarDocs/SLETTER',
         docId: '4',
+        ifPopulatedRemove: false,
       },
     ],
   },

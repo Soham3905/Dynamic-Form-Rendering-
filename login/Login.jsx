@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../redux/authslice';
+import { setUser, setCompleteAddress, setHouseDetails, setArea, setPincode, setCity, setPropertyDoc, setIsBillOnYourName } from '../redux/authslice';
 import { Alert } from 'react-native';
 
 import axios from 'axios';
@@ -21,6 +21,15 @@ export default function Login({ navigation }) {
 
       // Save user to redux
       dispatch(setUser(response.data));
+      
+      // Save test address data to Redux for auto-populate
+      dispatch(setCompleteAddress('123 Main Street, Apartment 5B, New Delhi'));
+      dispatch(setHouseDetails('Flat 5B'));
+      dispatch(setArea('Sector 5'));
+      dispatch(setPincode('110001'));
+      dispatch(setCity('New Delhi'));
+      dispatch(setPropertyDoc('true'));
+      dispatch(setIsBillOnYourName('NO'));
 
       // After login, navigate to next screen
       navigation.navigate('Welcome');
@@ -44,7 +53,7 @@ export default function Login({ navigation }) {
             }}
           />
           <Text className="mt-4 text-2xl font-bold text-slate-800">MyFirstApp</Text>
-          <Text className="text-sm text-slate-500">Sign in to continue</Text>
+          <Text className="text-sm text-slate-500">Sign in to continue  </Text>
         </View>
 
         <View className="w-full bg-white rounded-xl p-6 shadow-md">
